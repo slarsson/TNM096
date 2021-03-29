@@ -1,143 +1,78 @@
 package main
 
 import (
+	"container/heap"
 	"fmt"
-	"sort"
 )
 
+type Heuristics func([][]int, [][]int) int
+
 type Puzzle struct {
-	seen   map[string]bool
-	start  Node
-	target [][]int
+	seen    map[string]bool
+	start   Node
+	target  [][]int
+	handler Heuristics
 }
 
-func NewPuzzle(input, target [][]int, size int) Puzzle {
+func NewPuzzle(input, target [][]int, action Heuristics) Puzzle {
 	startNode := Node{
-		size:   size,
-		depth:  0,
 		parent: nil,
 		state:  clone(input),
-		score:  0, // TODO
+		depth:  0,
+		score:  -1,
 	}
 
 	seen := make(map[string]bool)
 	seen[fmt.Sprint(startNode.state)] = true
 
 	return Puzzle{
-		seen:   seen,
-		start:  startNode,
-		target: clone(target),
+		seen:    seen,
+		start:   startNode,
+		target:  clone(target),
+		handler: action,
 	}
-}
-
-// TODO: add manhattan distans
-// func (p *Puzzle) Diff(item *Node) int {
-// 	wrong := 0
-// 	for i := 0; i < 3; i++ {
-// 		for j := 0; j < 3; j++ {
-// 			if item.state[i][j] == 0 {
-// 				continue
-// 			}
-
-// 			if p.target[i][j] != item.state[i][j] {
-// 				wrong++
-// 			}
-// 		}
-// 	}
-// 	return wrong
-// }
-
-func (p *Puzzle) Diff(item *Node) int {
-	wrong := 0
-	for i := 0; i < 3; i++ {
-		for j := 0; j < 3; j++ {
-			if item.state[i][j] == 0 {
-				continue
-			}
-
-			if p.target[i][j] != item.state[i][j] {
-				wrong++
-			}
-		}
-	}
-	return wrong
 }
 
 func (p *Puzzle) Solve() {
-	queue := NewQueue()
-
-	queue.Push(p.start)
 	p.seen[fmt.Sprint(p.start.state)] = true
+	queue := PriorityQueue{p.start}
+	heap.Init(&queue)
 
 	for {
-		curr := queue.Pop()
-		if curr == nil {
-			fmt.Println("NO SOLUTION FOUND")
-			break
+		if queue.Len() == 0 {
+			fmt.Println("NO SOLUTION")
+			return
 		}
 
-		for _, v := range curr.move() {
+		curr := heap.Pop(&queue).(Node)
+		for _, v := range curr.Eval() {
 			_, ok := p.seen[fmt.Sprint(v.state)]
 			if ok {
 				continue
 			}
 
-			score := p.Diff(&v)
+			score := p.handler(v.state, p.target)
 			if score == 0 {
-				fmt.Printf("SOLVED (in %d steps) \n", v.parent.depth+1)
+				fmt.Println(fmt.Sprintf("SOLVED (in %d steps)", v.parent.depth+1))
 				return
 			}
 
-			v.score = score + v.parent.depth + 1
-			v.depth = v.parent.depth + 1
-			queue.Push(v)
+			v.score = v.depth + score
+
+			heap.Push(&queue, v)
 			p.seen[fmt.Sprint(v.state)] = true
 		}
-
 	}
-
-}
-
-type Queue struct {
-	data []Node
-}
-
-func NewQueue() Queue {
-	return Queue{
-		data: []Node{},
-	}
-}
-
-func (q *Queue) Push(item Node) {
-	q.data = append(q.data, item)
-	sort.SliceStable(q.data, func(i, j int) bool {
-		return q.data[i].score < q.data[j].score
-	})
-}
-
-func (q *Queue) Len() int {
-	return len(q.data)
-}
-
-func (q *Queue) Pop() *Node {
-	if len(q.data) == 0 {
-		return nil
-	}
-
-	node := q.data[0]
-	q.data = q.data[1:]
-	return &node
 }
 
 type Node struct {
-	size   int
-	depth  int
 	parent *Node
 	state  [][]int
+	depth  int
 	score  int
 }
 
-func (n *Node) move() []Node {
+func (n *Node) Eval() []Node {
 	children := []Node{}
 	row := -1
 	col := -1
@@ -163,8 +98,7 @@ func (n *Node) move() []Node {
 	}
 
 	for _, v := range neighbors {
-		if v[0] < 0 || v[0] >= n.size || v[1] < 0 || v[1] >= n.size {
-			//fmt.Println("WTF2:", neighbors)
+		if v[0] < 0 || v[0] >= 3 || v[1] < 0 || v[1] >= 3 {
 			continue
 		}
 
@@ -175,21 +109,12 @@ func (n *Node) move() []Node {
 		newState[v[0]][v[1]] = tmp
 
 		children = append(children, Node{
-			size:   n.size,
 			parent: n,
 			state:  newState,
+			depth:  n.depth + 1,
+			score:  0,
 		})
 	}
 
 	return children
-}
-
-func clone(arr [][]int) [][]int {
-	out := make([][]int, len(arr))
-	for i, v := range arr {
-		row := make([]int, len(v))
-		copy(row, v)
-		out[i] = row
-	}
-	return out
 }

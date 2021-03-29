@@ -2,59 +2,55 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 	"time"
 )
 
+// H1
+// The number of misplaced tiles; the number of squares that are not in the right place.
+// The space isnot a tile, so it cannot be out of place.
+func h1(a, b [][]int) int {
+	wrong := 0
+	for i := 0; i < 3; i++ {
+		for j := 0; j < 3; j++ {
+			if a[i][j] == 0 {
+				continue
+			}
+
+			if a[i][j] != b[i][j] {
+				wrong++
+			}
+		}
+	}
+	return wrong
+}
+
+// H2
+// The Manhattan distance.
+func h2(a, b [][]int) int {
+	distance := 0
+	for r := 0; r < 3; r++ {
+		for c := 0; c < 3; c++ {
+			if a[r][c] == 0 {
+				continue
+			}
+			for i := 0; i < 3; i++ {
+				for j := 0; j < 3; j++ {
+					if a[r][c] == b[i][j] {
+						distance += int(math.Abs(float64(r)-float64(i)) + math.Abs(float64(c)-float64(j)))
+					}
+				}
+			}
+		}
+	}
+	return distance
+}
+
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
-
-	// input := [][]int{
-	// 	{1, 7, 3},
-	// 	{4, 5, 6},
-	// 	{2, 0, 8},
-	// }
-
-	// // target := [][]int{
-	// // 	{1, 3, 6},
-	// // 	{4, 5, 0},
-	// // 	{2, 7, 8},
-	// // }
-
-	// target := [][]int{
-	// 	{5, 1, 3},
-	// 	{4, 0, 6},
-	// 	{2, 7, 8},
-	// }
-
-	// target := [][]int{
-	// 	{1, 2, 3},
-	// 	{0, 4, 6},
-	// 	{7, 5, 8},
-	// }
-
-	// p, err := NewPuzzle(input, target)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return
-	// }
-
-	// fmt.Println(p)
-
-	// myNode := Node{
-	// 	size: 3,
-	// 	state: [][]int{
-	// 		{5, 1, 3},
-	// 		{4, 0, 6},
-	// 		{2, 7, 8},
-	// 	},
-	// }
-
-	//fmt.Println(myNode.move())
-
-	//fmt.Println("test:", randomState())
-
 	itr := 10
+
 	for i := 0; i < itr; i++ {
 		input := randomState()
 		target := randomState()
@@ -66,10 +62,9 @@ func main() {
 
 		if isSolvable(input) != isSolvable(target) {
 			fmt.Println("NOT SOLVABLE")
-			//continue
 		}
 
-		p := NewPuzzle(input, target, 3)
+		p := NewPuzzle(input, target, h1)
 		start := time.Now()
 		p.Solve()
 		duration := time.Since(start)
@@ -79,8 +74,28 @@ func main() {
 		fmt.Println("")
 	}
 
-	//fmt.Println(p.seen)
+	for i := 0; i < itr; i++ {
+		input := randomState()
+		target := randomState()
 
+		fmt.Println("=======================================")
+		fmt.Println("input", input)
+		fmt.Println("target", target)
+		fmt.Println("--")
+
+		if isSolvable(input) != isSolvable(target) {
+			fmt.Println("NOT SOLVABLE")
+		}
+
+		p := NewPuzzle(input, target, h2)
+		start := time.Now()
+		p.Solve()
+		duration := time.Since(start)
+
+		fmt.Println(fmt.Sprintf("time: %f", duration.Seconds()))
+		fmt.Println("=======================================")
+		fmt.Println("")
+	}
 }
 
 func randomState() [][]int {
@@ -125,4 +140,14 @@ func isSolvable(arr [][]int) bool {
 	}
 
 	return invs%2 == 0
+}
+
+func clone(arr [][]int) [][]int {
+	out := make([][]int, len(arr))
+	for i, v := range arr {
+		row := make([]int, len(v))
+		copy(row, v)
+		out[i] = row
+	}
+	return out
 }
