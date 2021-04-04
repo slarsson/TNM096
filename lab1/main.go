@@ -51,16 +51,21 @@ func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 	itr := 10
 
+	target := [][]int{
+		{1, 2, 3},
+		{4, 5, 6},
+		{7, 8, 0},
+	}
+
 	for i := 0; i < itr; i++ {
 		input := randomState()
-		target := randomState()
 
 		fmt.Println("=======================================")
 		fmt.Println("input", input)
 		fmt.Println("target", target)
 		fmt.Println("--")
 
-		if isSolvable(input) != isSolvable(target) {
+		if !isSolvable(input) {
 			fmt.Println("NOT SOLVABLE")
 		}
 
@@ -76,14 +81,13 @@ func main() {
 
 	for i := 0; i < itr; i++ {
 		input := randomState()
-		target := randomState()
 
 		fmt.Println("=======================================")
 		fmt.Println("input", input)
 		fmt.Println("target", target)
 		fmt.Println("--")
 
-		if isSolvable(input) != isSolvable(target) {
+		if !isSolvable(input) {
 			fmt.Println("NOT SOLVABLE")
 		}
 
