@@ -124,20 +124,20 @@ func randomState() [][]int {
 
 // inversion: https://math.stackexchange.com/questions/293527/how-to-check-if-a-8-puzzle-is-solvable
 func isSolvable(arr [][]int) bool {
-	flattend := []int{}
+	flattened := []int{}
 	for i := 0; i < len(arr); i++ {
 		for j := 0; j < len(arr[i]); j++ {
 			if arr[i][j] == 0 {
 				continue
 			}
-			flattend = append(flattend, arr[i][j])
+			flattened = append(flattened, arr[i][j])
 		}
 	}
 
 	invs := 0
-	for i := 0; i < (len(flattend) - 1); i++ {
-		for j := (i + 1); j < len(flattend); j++ {
-			if flattend[i] > flattend[j] {
+	for i := 0; i < (len(flattened) - 1); i++ {
+		for j := (i + 1); j < len(flattened); j++ {
+			if flattened[i] > flattened[j] {
 				invs++
 			}
 		}

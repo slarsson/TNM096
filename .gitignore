@@ -1,2 +1,5 @@
-__pycache__/
 lab2/files
+
+__pycache__/
+*.py[cod]
+*$py.class
