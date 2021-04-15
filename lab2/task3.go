@@ -48,13 +48,36 @@ func main() {
 		"K3",
 	}
 
-	s, err := schedule(classes, classrooms)
+	fmt.Println("TASK 3")
+
+	s, err := schedule(classes, classrooms, true)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
 	s.Print()
+	fmt.Println("")
+	fmt.Println("")
+	fmt.Println("TASK 4")
+
+	min := 999999
+	var cur *Schedule
+	for i := 0; i < 10000; i++ {
+		s, err := schedule(classes, classrooms, false)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		grade := s.grade()
+		if grade < min {
+			min = grade
+			cur = s
+		}
+	}
+
+	cur.Print()
 }
 
 var allowedHours []int = []int{9, 10, 11, 12, 1, 2, 3, 4}
@@ -64,7 +87,7 @@ type Schedule struct {
 	matrix []string
 }
 
-func schedule(classes []string, classrooms []string) (*Schedule, error) {
+func schedule(classes []string, classrooms []string, print bool) (*Schedule, error) {
 	if len(classes) == 0 || len(classrooms) == 0 {
 		return nil, fmt.Errorf("missing classes and/or classrooms")
 	}
@@ -95,7 +118,7 @@ func schedule(classes []string, classrooms []string) (*Schedule, error) {
 		s.matrix[a], s.matrix[b] = s.matrix[b], s.matrix[a]
 	}
 
-	err := s.solve()
+	err := s.solve(print)
 	if err != nil {
 		return nil, err
 	}
@@ -103,13 +126,15 @@ func schedule(classes []string, classrooms []string) (*Schedule, error) {
 	return &s, nil
 }
 
-func (s Schedule) solve() error {
+func (s Schedule) solve(print bool) error {
 	maxLimit := 100000
 	for i := 0; i < maxLimit; i++ {
 		conflicts := s.conflicts()
 		n := len(conflicts)
 		if n == 0 {
-			fmt.Printf("Solved in %d steps \n", i)
+			if print {
+				fmt.Printf("Solved in %d steps \n", i)
+			}
 			return nil
 		}
 
