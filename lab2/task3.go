@@ -88,6 +88,7 @@ func schedule(classes []string, classrooms []string) (*Schedule, error) {
 		s.matrix[i] = classes[i]
 	}
 
+	// create random schedule
 	for i := 0; i < (10 * size); i++ {
 		a := rand.Intn(size)
 		b := rand.Intn(size)
@@ -108,7 +109,7 @@ func (s Schedule) solve() error {
 		conflicts := s.conflicts()
 		n := len(conflicts)
 		if n == 0 {
-			fmt.Println(fmt.Sprintf("Solved in %d steps", i))
+			fmt.Printf("Solved in %d steps \n", i)
 			return nil
 		}
 
@@ -121,6 +122,7 @@ func (s Schedule) solve() error {
 	return fmt.Errorf("no solution found")
 }
 
+// find all conflicting items
 func (s Schedule) conflicts() map[int]int {
 	found := make(map[int]int)
 	w := len(s.rooms)
@@ -154,6 +156,7 @@ func (s Schedule) conflicts() map[int]int {
 func (s Schedule) swap(index int) {
 	items := [][2]int{}
 
+	// get the number of conflicts when swapping position with 'index'
 	for i := 0; i < len(s.matrix); i++ {
 		if i == index {
 			continue
@@ -172,6 +175,7 @@ func (s Schedule) swap(index int) {
 		return items[i][1] < items[j][1]
 	})
 
+	// count the min-conflicts items
 	size := 0
 	for i := 0; i < len(items); i++ {
 		size++
