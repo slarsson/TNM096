@@ -73,62 +73,40 @@ def resolution(a, b):
         return False
     return c
 
-# VARFÖR FUNKAR INTE DETTA!?!?!?!?!?!
-# ??
 def solver(kb):
-    kb = copy.deepcopy(kb)
-
     while True:
+        kb = copy.deepcopy(kb)
+        kb_prim = copy.deepcopy(kb)
         s = set()
+
         my_list = list(kb)
-        for i in range(len(my_list)):
-            for j in range(i+1, len(my_list)):
+        for i in range(len(kb)-1):
+            for j in range(i+1, len(kb)):
                 c = resolution(my_list[i], my_list[j])
                 if c is not False:
                     s.add(c)
         
+        # nothing to do
         if len(s) == 0:
             return kb
 
-        kb_prime = incorporate(s, kb)
+        # if something in s (a) is a strict subset to something in kb (b), meaning: b have everything in a + more
+        # => remove b and a instead
+        for a in s:
+            item_to_remove = set()
+            for b in kb:
+                if a.is_strict_subset(b):
+                    item_to_remove.add(b)
+            for item in item_to_remove:
+                kb.remove(item)
+            kb.add(a)
 
-        if kb == kb_prime:
-            break
-        kb = kb_prime
-    
-    print(len(kb_prime))
-    for item in kb_prime:
-        print(item)
-    return kb
-
-def incorporate(s, kb):
-    kb = copy.deepcopy(kb)
-    for a in s:
-        kb = incorporate_clause(a, kb)
-    return kb
-
-def incorporate_clause(a, kb):
-    kb = copy.deepcopy(kb)
-
-    for b in kb:
-        if b.is_subset(a):
+        if kb == kb_prim:
             return kb
-
-    
-    rm = set()
-    for b in copy.deepcopy(kb):
-        if a.is_strict_subset(b):
-            rm.add(b)
-
-    new_kb = set()
-    new_kb.add(a)
-    for item in kb:
-        if item not in rm:
-            new_kb.add(item)
-    return new_kb
 
 
 if __name__ == "__main__":
+    print("TASK 1:")
     # 1. 
     # The resolution of two clauses in CNF. That is, given two clauses the 
     # program calculates their resolvent by applying one resolution step.
@@ -150,7 +128,8 @@ if __name__ == "__main__":
     print(res)
     assert res == False
 
-
+    print("")
+    print("TASK 2:")
     # 2.
     # The resolution mechanism applied to a given set S of clauses.
     # Given S, the program selectstwo arbitrary clauses from S, or any previously calculated resolvent, and calculates thenew resolvents.
@@ -161,5 +140,12 @@ if __name__ == "__main__":
     KB.add(Clause("-movie V money"))
     KB.add(Clause("-movie V -ice"))
     KB.add(Clause("movie"))
-   
-    solver(KB)
+    res = solver(KB)
+    for item in res:
+        print(item)
+    assert len(res) == 4
+    items = [item.__str__() for item in res]
+    assert "money" in items
+    assert "movie" in items
+    assert "-ice" in items
+    assert "-sun" in items
