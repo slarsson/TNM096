@@ -7,7 +7,7 @@ from task1 import Clause, resolution, solver
 #   C -> A => -c V a
 #
 # 3. B does not know how to drive.
-#   (A or C) and B => a V c V -b
+#   (A or C) -> B => a V c V -b
 
 KB = set()
 KB.add(Clause("a V b V c"))
