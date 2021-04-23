@@ -7,12 +7,13 @@ from task1 import Clause, resolution, solver
 #   C -> A => -c V a
 #
 # 3. B does not know how to drive.
-#   (A or C) -> B => a V c V -b
+#   => da V dc + -db 
 
 KB = set()
 KB.add(Clause("a V b V c"))
 KB.add(Clause("-c V a"))
-KB.add(Clause("a V c V -b"))
+KB.add(Clause("da V dc"))
+KB.add(Clause("-db"))
 
 res = solver(KB)
 for item in res:

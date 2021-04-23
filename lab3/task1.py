@@ -91,7 +91,7 @@ def solver(kb):
             return kb
 
         # if something in s (a) is a strict subset to something in kb (b), meaning: b have everything in a + more
-        # => remove b and a instead
+        # => remove b and use a instead
         for a in s:
             items_to_remove = set()
             for b in kb:
